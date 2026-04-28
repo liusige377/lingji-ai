@@ -515,7 +515,7 @@
 </footer>
 
 <script>
-const API_BASE = 'http://101.133.136.55:3000';
+const API_BASE = 'http://101.133.136.55:3000'; // 注意：GitHub Pages是HTTPS，会阻止HTTP API调用（Mixed Content）
 let currentUser = null;
 let token = localStorage.getItem('lingji_token');
 let apiKey = localStorage.getItem('lingji_api_key');
