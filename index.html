@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>灵芝机 - AI百宝箱</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #0a0a1a; color: #e0e0e0; min-height: 100vh; }
+
+    /* 顶部导航 */
+    .header { display: flex; justify-content: space-between; align-items: center; padding: 16px 40px; background: rgba(10,10,26,0.9); border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
+    .logo { font-size: 22px; font-weight: 700; color: #00d4aa; text-decoration: none; }
+    .logo span { color: #fff; }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { color: #a0a0b0; text-decoration: none; font-size: 15px; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: #00d4aa; }
+    .nav-links a.active { font-weight: 600; }
+    .user-area { display: flex; gap: 12px; align-items: center; }
+    .btn { padding: 8px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; border: none; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #e0e0e0; }
+    .btn-outline:hover { border-color: #00d4aa; color: #00d4aa; }
+    .btn-primary { background: linear-gradient(135deg, #00d4aa, #0099ff); color: #fff; font-weight: 600; }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 15px rgba(0,212,170,0.4); }
+    .btn-ghost { background: transparent; color: #a0a0b0; font-size: 13px; padding: 6px 14px; }
+    .btn-ghost:hover { color: #e0e0e0; }
+
+    /* 隐藏用户状态元素 */
+    .user-info { display: none; }
+    .user-name-display { display: none; }
+    #userMenuBtn { display: none; }
+
+    /* 模态框 */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #13132a; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 36px; width: 400px; max-width: 90vw; position: relative; }
+    .modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; color: #666; font-size: 20px; cursor: pointer; }
+    .modal-close:hover { color: #fff; }
+    .modal-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 24px; text-align: center; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; color: #888; margin-bottom: 6px; }
+    .form-group input { width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e0e0e0; font-size: 14px; outline: none; transition: border-color 0.2s; }
+    .form-group input:focus { border-color: #00d4aa; }
+    .form-group .hint { font-size: 11px; color: #666; margin-top: 4px; }
+    .form-error { color: #ff6b6b; font-size: 13px; margin-top: 6px; min-height: 18px; }
+    .form-success { color: #00d4aa; font-size: 13px; margin-top: 6px; min-height: 18px; }
+    .btn-full { width: 100%; padding: 12px; background: linear-gradient(135deg, #00d4aa, #0099ff); color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-full:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-full:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .form-switch { text-align: center; margin-top: 16px; font-size: 13px; color: #666; }
+    .form-switch a { color: #00d4aa; text-decoration: none; cursor: pointer; }
+    .form-switch a:hover { text-decoration: underline; }
+
+    /* Hero区 */
+    .hero { text-align: center; padding: 80px 20px 60px; }
+    .hero-badge { display: inline-block; padding: 4px 14px; background: rgba(0,212,170,0.12); border: 1px solid rgba(0,212,170,0.3); border-radius: 20px; font-size: 12px; color: #00d4aa; margin-bottom: 24px; }
+    .hero h1 { font-size: 52px; font-weight: 800; color: #fff; margin-bottom: 16px; line-height: 1.2; }
+    .hero h1 em { color: #00d4aa; font-style: normal; }
+    .hero p { font-size: 18px; color: #8888aa; max-width: 560px; margin: 0 auto 36px; line-height: 1.7; }
+    .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .hero-stats { display: flex; gap: 48px; justify-content: center; margin-top: 60px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .stat { text-align: center; }
+    .stat-num { font-size: 28px; font-weight: 800; color: #00d4aa; }
+    .stat-label { font-size: 13px; color: #666; margin-top: 4px; }
+
+    /* 功能网格 */
+    .section { padding: 60px 40px; max-width: 1100px; margin: 0 auto; }
+    .section-title { text-align: center; font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+    .section-desc { text-align: center; color: #666; font-size: 15px; margin-bottom: 40px; }
+    .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+    .tool-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 24px; cursor: pointer; transition: all 0.25s; position: relative; overflow: hidden; text-decoration: none; display: block; color: inherit; }
+    .tool-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,212,170,0.05), transparent); opacity: 0; transition: opacity 0.25s; }
+    .tool-card:hover { border-color: rgba(0,212,170,0.3); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+    .tool-card:hover::before { opacity: 1; }
+    .tool-icon { font-size: 36px; margin-bottom: 14px; }
+    .tool-name { font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .tool-desc { font-size: 13px; color: #666; line-height: 1.5; }
+    .tool-tag { display: inline-block; padding: 2px 8px; background: rgba(0,212,170,0.1); border-radius: 4px; font-size: 11px; color: #00d4aa; margin-top: 10px; }
+    .tool-tag.hot { background: rgba(255,100,100,0.1); color: #ff8080; }
+
+    /* AI Chat Section */
+    #chat-section { display: none; padding: 20px 40px; max-width: 800px; margin: 0 auto; }
+    #chat-section.show { display: block; }
+    .chat-back { display: inline-flex; align-items: center; gap: 6px; color: #666; font-size: 14px; cursor: pointer; margin-bottom: 16px; padding: 6px 12px; border-radius: 6px; transition: all 0.2s; }
+    .chat-back:hover { color: #00d4aa; background: rgba(0,212,170,0.08); }
+    .chat-container { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; height: calc(100vh - 200px); min-height: 500px; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .chat-messages::-webkit-scrollbar { width: 4px; }
+    .chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    .msg { display: flex; gap: 12px; max-width: 85%; }
+    .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+    .msg-avatar { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .msg.bot .msg-avatar { background: linear-gradient(135deg, #00d4aa, #0099ff); }
+    .msg.user .msg-avatar { background: rgba(255,255,255,0.1); color: #888; font-size: 14px; }
+    .msg-bubble { padding: 10px 16px; border-radius: 12px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+    .msg.bot .msg-bubble { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px 12px 12px 12px; }
+    .msg.user .msg-bubble { background: linear-gradient(135deg, rgba(0,212,170,0.3), rgba(0,153,255,0.3)); border: 1px solid rgba(0,212,170,0.2); border-radius: 12px 4px 12px 12px; }
+    .msg.loading .msg-bubble { color: #666; font-style: italic; }
+    .msg.error .msg-bubble { color: #ff8080; border-color: rgba(255,100,100,0.2); }
+    .chat-input-area { padding: 16px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 10px; align-items: flex-end; }
+    .chat-input-area textarea { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 14px; color: #e0e0e0; font-size: 14px; resize: none; outline: none; min-height: 44px; max-height: 120px; font-family: inherit; transition: border-color 0.2s; }
+    .chat-input-area textarea:focus { border-color: rgba(0,212,170,0.5); }
+    .chat-input-area textarea::placeholder { color: #555; }
+    .btn-send { width: 44px; height: 44px; background: linear-gradient(135deg, #00d4aa, #0099ff); border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; transition: all 0.2s; }
+    .btn-send:hover { opacity: 0.85; transform: scale(1.05); }
+    .btn-send:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .model-select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 10px; color: #888; font-size: 12px; cursor: pointer; outline: none; }
+    .model-select option { background: #13132a; color: #e0e0e0; }
+    .chat-meta { padding: 8px 16px; border-top: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #444; }
+    .chat-meta .balance { color: #00d4aa; }
+
+    /* Roleplay Section */
+    #roleplay-section { display: none; padding: 20px 40px; max-width: 900px; margin: 0 auto; }
+    #roleplay-section.show { display: block; }
+    .roleplay-container { display: grid; grid-template-columns: 260px 1fr; gap: 20px; height: calc(100vh - 200px); min-height: 500px; }
+    .role-list { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 16px; overflow-y: auto; }
+    .role-list h3 { font-size: 13px; color: #666; margin-bottom: 12px; padding: 0 4px; }
+    .role-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; cursor: pointer; transition: all 0.2s; margin-bottom: 4px; }
+    .role-item:hover { background: rgba(255,255,255,0.05); }
+    .role-item.active { background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.2); }
+    .role-avatar { font-size: 28px; }
+    .role-item-info .role-name { font-size: 14px; font-weight: 600; color: #e0e0e0; }
+    .role-item-info .role-tagline { font-size: 11px; color: #555; margin-top: 2px; }
+    .roleplay-chat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; display: flex; flex-direction: column; }
+    .roleplay-header { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 12px; }
+    .roleplay-header-avatar { font-size: 32px; }
+    .roleplay-header-info h2 { font-size: 16px; color: #fff; }
+    .roleplay-header-info p { font-size: 12px; color: #555; margin-top: 2px; }
+    .roleplay-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+    .rp-msg { display: flex; gap: 10px; max-width: 88%; }
+    .rp-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+    .rp-avatar { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .rp-bubble { padding: 10px 14px; border-radius: 10px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
+    .rp-msg.bot .rp-bubble { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); }
+    .rp-msg.user .rp-bubble { background: rgba(0,212,170,0.2); border: 1px solid rgba(0,212,170,0.15); }
+    .roleplay-input { padding: 14px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 10px; align-items: flex-end; }
+    .roleplay-input textarea { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 14px; color: #e0e0e0; font-size: 14px; resize: none; min-height: 44px; max-height: 100px; outline: none; font-family: inherit; }
+    .roleplay-input textarea:focus { border-color: rgba(0,212,170,0.5); }
+
+    /* Writing Section */
+    #writing-section { display: none; padding: 20px 40px; max-width: 900px; margin: 0 auto; }
+    #writing-section.show { display: block; }
+    .writing-container { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+    .writing-tools { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 16px; }
+    .writing-tools h3 { font-size: 13px; color: #666; margin-bottom: 12px; padding: 0 4px; }
+    .writing-tool-item { padding: 10px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .writing-tool-item:hover { background: rgba(255,255,255,0.05); }
+    .writing-tool-item.active { background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.2); }
+    .writing-tool-item .w-icon { font-size: 20px; }
+    .writing-tool-item .w-name { font-size: 14px; color: #c0c0d0; }
+    .writing-panel { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; display: flex; flex-direction: column; }
+    .writing-panel-header { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .writing-panel-header h2 { font-size: 16px; color: #fff; }
+    .writing-panel-header p { font-size: 12px; color: #555; margin-top: 4px; }
+    .writing-form { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+    .writing-form input, .writing-form select { width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e0e0e0; font-size: 14px; outline: none; font-family: inherit; }
+    .writing-form input:focus, .writing-form select:focus { border-color: rgba(0,212,170,0.5); }
+    .writing-form input::placeholder { color: #555; }
+    .writing-form label { font-size: 13px; color: #888; margin-bottom: 4px; display: block; }
+    .writing-result { flex: 1; margin: 0 20px 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 16px; font-size: 14px; line-height: 1.8; color: #c0c0d0; white-space: pre-wrap; min-height: 200px; max-height: 400px; overflow-y: auto; }
+
+    /* 起名 Section */
+    #naming-section { display: none; padding: 20px 40px; max-width: 600px; margin: 0 auto; }
+    #naming-section.show { display: block; }
+    .naming-container { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 32px; }
+    .naming-type-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+    .naming-tab { flex: 1; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer; font-size: 14px; color: #666; border: 1px solid rgba(255,255,255,0.08); transition: all 0.2s; }
+    .naming-tab.active { background: rgba(0,212,170,0.12); border-color: rgba(0,212,170,0.3); color: #00d4aa; }
+    .naming-form { display: flex; flex-direction: column; gap: 14px; }
+    .naming-form label { font-size: 13px; color: #888; }
+    .naming-form input, .naming-form select { width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e0e0e0; font-size: 14px; outline: none; font-family: inherit; }
+    .naming-form input:focus { border-color: rgba(0,212,170,0.5); }
+    .naming-result { margin-top: 20px; padding: 20px; background: rgba(0,212,170,0.05); border: 1px solid rgba(0,212,170,0.15); border-radius: 12px; display: none; }
+    .naming-result.show { display: block; }
+    .naming-name { font-size: 28px; font-weight: 800; color: #00d4aa; text-align: center; margin-bottom: 12px; }
+    .naming-explain { font-size: 13px; color: #888; line-height: 1.7; }
+
+    /* 底部 */
+    .footer { text-align: center; padding: 40px; color: #444; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.04); margin-top: 40px; }
+    .footer a { color: #555; text-decoration: none; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; background: #1a1a30; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 14px; color: #e0e0e0; z-index: 9999; transform: translateY(80px); opacity: 0; transition: all 0.3s; pointer-events: none; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.error { border-color: rgba(255,100,100,0.3); color: #ff8080; }
+    .toast.success { border-color: rgba(0,212,170,0.3); color: #00d4aa; }
+
+    @media (max-width: 768px) {
+      .header { padding: 12px 16px; }
+      .nav-links { display: none; }
+      .hero { padding: 40px 16px 30px; }
+      .hero h1 { font-size: 32px; }
+      .hero-stats { gap: 24px; }
+      .section { padding: 40px 16px; }
+      .roleplay-container { grid-template-columns: 1fr; }
+      .writing-container { grid-template-columns: 1fr; }
+      .role-list { max-height: 200px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<header class="header">
+  <a href="#" class="logo" onclick="showHome()">灵<span>芝</span>机</a>
+  <ul class="nav-links">
+    <li><a href="#" class="nav-item active" data-page="home" onclick="showHome()">首页</a></li>
+    <li><a href="#" class="nav-item" data-page="tools" onclick="showTools()">AI工具</a></li>
+  </ul>
+  <div class="user-area" id="guestArea">
+    <button class="btn btn-outline" onclick="showLogin()">登录</button>
+    <button class="btn btn-primary" onclick="showRegister()">注册</button>
+  </div>
+  <div class="user-area" id="userArea" style="display:none">
+    <span style="font-size:13px;color:#888" id="userNameDisplay"></span>
+    <button class="btn btn-ghost" onclick="logout()">退出</button>
+  </div>
+</header>
+
+<!-- 登录模态框 -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+    <div class="modal-title">登录账号</div>
+    <div class="form-group"><label>用户名</label><input type="text" id="loginUsername" placeholder="输入用户名" autocomplete="username"></div>
+    <div class="form-group"><label>密码</label><input type="password" id="loginPassword" placeholder="输入密码" autocomplete="current-password"></div>
+    <div class="form-error" id="loginError"></div>
+    <button class="btn-full" id="loginBtn" onclick="doLogin()">登录</button>
+    <div class="form-switch">还没有账号？<a onclick="switchModal('loginModal','registerModal')">立即注册</a></div>
+    <div class="form-switch" style="margin-top:8px"><a onclick="switchModal('loginModal','resetModal')" style="color:#666;font-size:12px">忘记密码？</a></div>
+  </div>
+</div>
+
+<!-- 注册模态框 -->
+<div class="modal-overlay" id="registerModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('registerModal')">&times;</button>
+    <div class="modal-title">注册账号</div>
+    <div class="form-group"><label>用户名</label><input type="text" id="regUsername" placeholder="2-20位字母或数字"></div>
+    <div class="form-group"><label>邮箱</label><input type="email" id="regEmail" placeholder="用于找回密码"></div>
+    <div class="form-group"><label>密码</label><input type="password" id="regPassword" placeholder="至少6位"></div>
+    <div class="form-group"><label>验证码 <a onclick="sendCode()" id="sendCodeBtn" style="color:#00d4aa;cursor:pointer;font-size:13px;float:right">获取验证码</a></label>
+    <input type="text" id="regCode" placeholder="输入邮箱验证码" maxlength="6"></div>
+    <div class="form-error" id="regError"></div>
+    <div class="form-success" id="regSuccess"></div>
+    <button class="btn-full" id="regBtn" onclick="doRegister()">注册</button>
+    <div class="form-switch">已有账号？<a onclick="switchModal('registerModal','loginModal')">去登录</a></div>
+  </div>
+</div>
+
+<!-- 重置密码模态框 -->
+<div class="modal-overlay" id="resetModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('resetModal')">&times;</button>
+    <div class="modal-title">重置密码</div>
+    <div class="form-group"><label>邮箱</label><input type="email" id="resetEmail" placeholder="注册时填写的邮箱"></div>
+    <div class="form-group"><label>验证码 <a onclick="sendResetCode()" id="sendResetCodeBtn" style="color:#00d4aa;cursor:pointer;font-size:13px;float:right">获取验证码</a></label>
+    <input type="text" id="resetCode" placeholder="输入验证码" maxlength="6"></div>
+    <div class="form-group"><label>新密码</label><input type="password" id="resetPassword" placeholder="至少6位"></div>
+    <div class="form-error" id="resetError"></div>
+    <div class="form-success" id="resetSuccess"></div>
+    <button class="btn-full" onclick="doReset()">重置密码</button>
+    <div class="form-switch"><a onclick="switchModal('resetModal','loginModal')">想起密码了？去登录</a></div>
+  </div>
+</div>
+
+<!-- 首页 -->
+<main id="homePage">
+  <div class="hero">
+    <div class="hero-badge">✨ AI应用超市 · 全部免费体验</div>
+    <h1>一个平台，<br><em>搞定所有AI需求</em></h1>
+    <p>聊天、写作、角色扮演、起名、情话…30+AI模型驱动，想怎么用就怎么用</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="openChat()" style="padding:12px 32px;font-size:16px">🚀 立即体验</button>
+      <button class="btn btn-outline" onclick="showTools()" style="padding:12px 32px;font-size:16px">📦 查看全部工具</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">31+</div><div class="stat-label">AI模型</div></div>
+      <div class="stat"><div class="stat-num">10+</div><div class="stat-label">AI工具</div></div>
+      <div class="stat"><div class="stat-num">免费</div><div class="stat-label">注册即用</div></div>
+    </div>
+  </div>
+
+  <!-- 快捷入口 -->
+  <div class="section">
+    <div class="section-title">🔥 热门工具</div>
+    <div class="section-desc">点击直接使用，无需注册也能体验部分功能</div>
+    <div class="tools-grid">
+      <div class="tool-card" onclick="openChat()">
+        <div class="tool-icon">🤖</div>
+        <div class="tool-name">AI智能聊天</div>
+        <div class="tool-desc">31个AI模型加持，什么都能问</div>
+        <div class="tool-tag hot">最热门</div>
+      </div>
+      <div class="tool-card" onclick="openRoleplay()">
+        <div class="tool-icon">🎭</div>
+        <div class="tool-name">AI角色扮演</div>
+        <div class="tool-desc">和鲁迅、李白、乔布斯聊天</div>
+        <div class="tool-tag hot">趣味十足</div>
+      </div>
+      <div class="tool-card" onclick="openWriting()">
+        <div class="tool-icon">✍️</div>
+        <div class="tool-name">AI写作工坊</div>
+        <div class="tool-desc">文章、方案、邮件，一键生成</div>
+        <div class="tool-tag">实用</div>
+      </div>
+      <div class="tool-card" onclick="openNaming()">
+        <div class="tool-icon">🏆</div>
+        <div class="tool-name">AI起名大师</div>
+        <div class="tool-desc">宝宝、公司、品牌，专业命名</div>
+        <div class="tool-tag">高客单价</div>
+      </div>
+      <div class="tool-card" onclick="openChatLove()">
+        <div class="tool-icon">💕</div>
+        <div class="tool-name">土味情话</div>
+        <div class="tool-desc">一键生成专属情话，撩人不费力</div>
+        <div class="tool-tag">好玩</div>
+      </div>
+      <div class="tool-card" onclick="openTarot()">
+        <div class="tool-icon">🔮</div>
+        <div class="tool-name">AI塔罗占卜</div>
+        <div class="tool-desc">输入问题，AI为你抽牌解读</div>
+        <div class="tool-tag">娱乐</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- 工具列表页 -->
+<main id="toolsPage" style="display:none">
+  <div class="section">
+    <div class="section-title">📦 AI工具箱</div>
+    <div class="section-desc">全部功能，一站搞定</div>
+    <div class="tools-grid">
+      <div class="tool-card" onclick="openChat()"><div class="tool-icon">🤖</div><div class="tool-name">AI智能聊天</div><div class="tool-desc">31个AI模型加持，什么都能问</div><div class="tool-tag hot">最热门</div></div>
+      <div class="tool-card" onclick="openRoleplay()"><div class="tool-icon">🎭</div><div class="tool-name">AI角色扮演</div><div class="tool-desc">和历史名人、虚拟人物对话</div><div class="tool-tag hot">趣味十足</div></div>
+      <div class="tool-card" onclick="openWriting()"><div class="tool-icon">✍️</div><div class="tool-name">AI写作工坊</div><div class="tool-desc">文章、方案、邮件一键生成</div><div class="tool-tag">实用</div></div>
+      <div class="tool-card" onclick="openNaming()"><div class="tool-icon">🏆</div><div class="tool-name">AI起名大师</div><div class="tool-desc">宝宝、公司、品牌专业命名</div><div class="tool-tag">高客单价</div></div>
+      <div class="tool-card" onclick="openChatLove()"><div class="tool-icon">💕</div><div class="tool-name">土味情话</div><div class="tool-desc">一键生成专属情话</div><div class="tool-tag">好玩</div></div>
+      <div class="tool-card" onclick="openTarot()"><div class="tool-icon">🔮</div><div class="tool-name">AI塔罗占卜</div><div class="tool-desc">输入问题，AI抽牌解读</div><div class="tool-tag">娱乐</div></div>
+      <div class="tool-card" onclick="openDream()"><div class="tool-icon">🌙</div><div class="tool-name">周公解梦</div><div class="tool-desc">输入梦境，AI解读吉凶</div><div class="tool-tag">趣味</div></div>
+      <div class="tool-card" onclick="openCouplet()"><div class="tool-icon">🏮</div><div class="tool-name">对联/藏头诗</div><div class="tool-desc">春节对联、藏头诗一键生成</div><div class="tool-tag">节庆必备</div></div>
+      <div class="tool-card" onclick="openInterview()"><div class="tool-icon">💼</div><div class="tool-name">AI简历优化</div><div class="tool-desc">上传简历，AI优化简历内容</div><div class="tool-tag">求职必备</div></div>
+      <div class="tool-card" onclick="openStudy()"><div class="tool-icon">📚</div><div class="tool-name">AI学习私教</div><div class="tool-desc">拍题解题、知识辅导</div><div class="tool-tag">学生必备</div></div>
+    </div>
+  </div>
+</main>
+
+<!-- AI聊天页 -->
+<section id="chat-section">
+  <div class="chat-back" onclick="showHome()">← 返回首页</div>
+  <div class="chat-container">
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-meta">
+      <select class="model-select" id="modelSelect" onchange="saveModel()">
+        <option value="glm-4-flash">GLM-4-Flash（默认·中文强）</option>
+        <option value="glm-z1-flash">GLM-Z1-Flash（高速·英文强）</option>
+        <option value="qwen-plus">Qwen-Plus（阿里·综合）</option>
+        <option value="qwen-turbo">Qwen-Turbo（阿里·快速）</option>
+        <option value="qwen-long">Qwen-Long（长文本）</option>
+        <option value="deepseek-chat">DeepSeek-Chat（深度）</option>
+        <option value="deepseek-reasoner">DeepSeek-R1（推理强）</option>
+        <option value="gemma-3-27b-it">Gemma-3-27B-IT（免费）</option>
+        <option value="qwen2-72b-instruct">Qwen2-72B（超大杯）</option>
+        <option value="llama-3.3-70b-instruct">Llama-3.3-70B（Meta）</option>
+        <option value="mixtral-8x22b-instruct">Mixtral-8x22B（欧洲）</option>
+        <option value="dbrx-instruct">DBRX（Databricks）</option>
+      </select>
+      <span class="balance" id="balanceDisplay">余额：加载中…</span>
+    </div>
+    <div class="chat-input-area">
+      <textarea id="chatInput" rows="1" placeholder="输入问题，Shift+Enter换行，Enter发送…" onkeydown="chatKeyDown(event)"></textarea>
+      <button class="btn-send" id="sendBtn" onclick="sendMessage()">▶</button>
+    </div>
+  </div>
+</section>
+
+<!-- 角色扮演页 -->
+<section id="roleplay-section">
+  <div class="chat-back" onclick="showHome()">← 返回首页</div>
+  <div class="roleplay-container">
+    <div class="role-list">
+      <h3>🎭 选择角色</h3>
+      <div class="role-item active" onclick="selectRole(this, 'luxun')">
+        <div class="role-avatar">🪶</div>
+        <div class="role-item-info"><div class="role-name">鲁迅</div><div class="role-tagline">文学巨匠，犀利深刻</div></div>
+      </div>
+      <div class="role-item" onclick="selectRole(this, 'libai')">
+        <div class="role-avatar">🍶</div>
+        <div class="role-item-info"><div class="role-name">李白</div><div class="role-tagline">诗仙浪漫，豪放不羁</div></div>
+      </div>
+      <div class="role-item" onclick="selectRole(this, 'jobs')">
+        <div class="role-avatar">🍎</div>
+        <div class="role-item-info"><div class="role-name">乔布斯</div><div class="role-tagline">创新教父，改变世界</div></div>
+      </div>
+      <div class="role-item" onclick="selectRole(this, 'einstein')">
+        <div class="role-avatar">⚛️</div>
+        <div class="role-item-info"><div class="role-name">爱因斯坦</div><div class="role-tagline">科学巨擘，洞察宇宙</div></div>
+      </div>
+      <div class="role-item" onclick="selectRole(this, 'lincoln')">
+        <div class="role-avatar">🎩</div>
+        <div class="role-item-info"><div class="role-name">林肯</div><div class="role-tagline">伟大总统，人民公仆</div></div>
+      </div>
+      <div class="role-item" onclick="selectRole(this, 'linzirong')">
+        <div class="role-avatar">🧥</div>
+        <div class="role-item-info"><div class="role-name">林子容</div><div class="role-tagline">知心姐姐，温暖治愈</div></div>
+      </div>
+      <div class="role-item" onclick="selectRole(this, 'psychologist')">
+        <div class="role-avatar">🛋️</div>
+        <div class="role-item-info"><div class="role-name">心理医生</div><div class="role-tagline">专业倾听，疗愈心灵</div></div>
+      </div>
+      <div class="role-item" onclick="selectRole(this, 'business')">
+        <div class="role-avatar">💼</div>
+        <div class="role-item-info"><div class="role-name">商业顾问</div><div class="role-tagline">战略高手，洞察商机</div></div>
+      </div>
+    </div>
+    <div class="roleplay-chat">
+      <div class="roleplay-header" id="rpHeader">
+        <div class="roleplay-header-avatar" id="rpAvatar">🪶</div>
+        <div class="roleplay-header-info"><h2 id="rpName">鲁迅</h2><p id="rpTagline">文学巨匠，犀利深刻。回答问题时请注意鲁迅的语言风格：简洁有力、讽刺深刻、常有警句。</p></div>
+      </div>
+      <div class="roleplay-messages" id="rpMessages"></div>
+      <div class="roleplay-input">
+        <textarea id="rpInput" rows="1" placeholder="对他说点什么…" onkeydown="rpKeyDown(event)" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 14px;color:#e0e0e0;font-size:14px;resize:none;min-height:44px;outline:none;font-family:inherit"></textarea>
+        <button class="btn-send" onclick="sendRpMessage()" style="width:44px;height:44px;background:linear-gradient(135deg,#00d4aa,#0099ff);border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">▶</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 写作工坊页 -->
+<section id="writing-section">
+  <div class="chat-back" onclick="showHome()">← 返回首页</div>
+  <div class="writing-container">
+    <div class="writing-tools">
+      <h3>✍️ 写作类型</h3>
+      <div class="writing-tool-item active" data-tool="article" onclick="selectWritingTool(this, 'article')">
+        <div class="w-icon">📝</div><div class="w-name">文章写作</div>
+      </div>
+      <div class="writing-tool-item" data-tool="copy" onclick="selectWritingTool(this, 'copy')">
+        <div class="w-icon">📣</div><div class="w-name">营销文案</div>
+      </div>
+      <div class="writing-tool-item" data-tool="email" onclick="selectWritingTool(this, 'email')">
+        <div class="w-icon">📧</div><div class="w-name">邮件撰写</div>
+      </div>
+      <div class="writing-tool-item" data-tool="summary" onclick="selectWritingTool(this, 'summary')">
+        <div class="w-icon">📋</div><div class="w-name">内容总结</div>
+      </div>
+      <div class="writing-tool-item" data-tool="translate" onclick="selectWritingTool(this, 'translate')">
+        <div class="w-icon">🌐</div><div class="w-name">中英翻译</div>
+      </div>
+    </div>
+    <div class="writing-panel">
+      <div class="writing-panel-header">
+        <h2 id="writingTitle">📝 AI文章写作</h2>
+        <p id="writingDesc">输入主题和要求，AI帮你写完整文章</p>
+      </div>
+      <div class="writing-form" id="writingForm">
+        <div><label>写作主题</label><input type="text" id="wTopic" placeholder="例如：人工智能对未来教育的影响"></div>
+        <div><label>文章类型</label><select id="wType"><option>说明文</option><option>议论文</option><option>记叙文</option><option>散文</option></select></div>
+        <div><label>字数要求</label><select id="wLength"><option>500字</option><option selected>1000字</option><option>2000字</option><option>3000字以上</option></select></div>
+        <div><label>补充要求（选填）</label><input type="text" id="wExtra" placeholder="例如：需要有数据支撑，语言生动"></div>
+        <button class="btn-full" onclick="generateWriting()" id="wBtn">✨ 开始写作</button>
+      </div>
+      <div class="writing-result" id="writingResult" style="display:none;flex:1;margin:0 20px 20px;min-height:200px;max-height:500px;overflow-y:auto;font-size:14px;line-height:1.8;color:#c0c0d0;white-space:pre-wrap"></div>
+      <div id="writingLoading" style="display:none;padding:20px;text-align:center;color:#555;font-size:14px;margin-bottom:20px">✍️ AI正在创作中，请稍候…</div>
+    </div>
+  </div>
+</section>
+
+<!-- 起名页 -->
+<section id="naming-section">
+  <div class="chat-back" onclick="showHome()">← 返回首页</div>
+  <div class="naming-container">
+    <h2 style="font-size:22px;font-weight:700;color:#fff;margin-bottom:6px;text-align:center">🏆 AI起名大师</h2>
+    <p style="text-align:center;color:#555;font-size:13px;margin-bottom:24px">专业AI命名系统，支持宝宝、公司、品牌多种场景</p>
+    <div class="naming-type-tabs">
+      <div class="naming-tab active" onclick="selectNamingType(this, 'baby')">👶 宝宝取名</div>
+      <div class="naming-tab" onclick="selectNamingType(this, 'company')">🏢 公司取名</div>
+      <div class="naming-tab" onclick="selectNamingType(this, 'brand')">📛 品牌取名</div>
+    </div>
+    <div class="naming-form" id="namingBaby">
+      <div><label>姓氏</label><input type="text" id="nSurname" placeholder="输入姓氏，如：张"></div>
+      <div><label>性别</label><select id="nGender"><option value="boy">男孩</option><option value="girl">女孩</option><option value="both">不限</option></select></div>
+      <div><label>出生年月（选填）</label><input type="text" id="nBirth" placeholder="如：2026年4月28日"></div>
+      <div><label>父母期望（选填）</label><input type="text" id="nHope" placeholder="如：聪明、善良、有志向"></div>
+      <button class="btn-full" onclick="generateNames()" id="nBtn">✨ 开始起名</button>
+    </div>
+    <div class="naming-form" id="namingCompany" style="display:none">
+      <div><label>行业类型</label><input type="text" id="cIndustry" placeholder="如：互联网科技"></div>
+      <div><label>核心理念</label><input type="text" id="cIdea" placeholder="如：创新、用户至上"></div>
+      <div><label>其他要求</label><input type="text" id="cExtra" placeholder="如：简洁易记"></div>
+      <button class="btn-full" onclick="generateCompanyNames()" id="cnBtn">✨ 开始起名</button>
+    </div>
+    <div class="naming-form" id="namingBrand" style="display:none">
+      <div><label>品牌类型</label><input type="text" id="bType" placeholder="如：服装、咖啡、化妆品"></div>
+      <div><label>品牌定位</label><input type="text" id="bPos" placeholder="如：高端、年轻、时尚"></div>
+      <div><label>目标用户</label><input type="text" id="bTarget" placeholder="如：都市白领女性"></div>
+      <button class="btn-full" onclick="generateBrandNames()" id="bnBtn">✨ 开始起名</button>
+    </div>
+    <div class="naming-result" id="namingResult">
+      <div class="naming-name" id="nResultName">——</div>
+      <div class="naming-explain" id="nResultExplain"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<footer class="footer">
+  <p>灵芝机 · AI百宝箱 &nbsp;|&nbsp; 基于31+大模型构建 &nbsp;|&nbsp; <a href="https://github.com/liusige377/lingji-ai" target="_blank" style="color:#555">GitHub</a></p>
+  <p style="margin-top:8px;font-size:11px;color:#333">Powered by 灵芝机AI &copy; 2026</p>
+</footer>
+
+<script>
+const API_BASE = 'http://101.133.136.55:3000';
+let currentUser = null;
+let token = localStorage.getItem('lingji_token');
+let apiKey = localStorage.getItem('lingji_api_key');
+let username = localStorage.getItem('lingji_username');
+let currentModel = localStorage.getItem('lingji_model') || 'glm-4-flash';
+let codeTimer = null;
+
+// ============ 页面导航 ============
+function showHome() {
+  document.getElementById('homePage').style.display = '';
+  document.getElementById('toolsPage').style.display = 'none';
+  document.getElementById('chat-section').classList.remove('show');
+  document.getElementById('roleplay-section').classList.remove('show');
+  document.getElementById('writing-section').classList.remove('show');
+  document.getElementById('naming-section').classList.remove('show');
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelector('.nav-item[data-page="home"]').classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+function showTools() {
+  document.getElementById('homePage').style.display = 'none';
+  document.getElementById('toolsPage').style.display = '';
+  document.getElementById('chat-section').classList.remove('show');
+  document.getElementById('roleplay-section').classList.remove('show');
+  document.getElementById('writing-section').classList.remove('show');
+  document.getElementById('naming-section').classList.remove('show');
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelector('.nav-item[data-page="tools"]').classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+function openChat() {
+  showHome();
+  document.getElementById('chat-section').classList.add('show');
+  if (!document.getElementById('chatMessages').children.length) addBotMessage('您好！我是灵芝机AI助手，有什么可以帮您的？');
+  document.getElementById('modelSelect').value = currentModel;
+  loadBalance();
+}
+function openRoleplay() {
+  showHome();
+  document.getElementById('roleplay-section').classList.add('show');
+  if (!document.getElementById('rpMessages').children.length) addRpMessage('bot', '在下鲁迅。有什么话，尽管说来听听。', '🪶');
+}
+function openWriting() {
+  showHome();
+  document.getElementById('writing-section').classList.add('show');
+}
+function openNaming() {
+  showHome();
+  document.getElementById('naming-section').classList.add('show');
+}
+
+// 小工具快捷入口
+function openChatLove() { openChat(); setTimeout(() => document.getElementById('chatInput').value = '帮我写10句土味情话', 100); }
+function openTarot() { openChat(); setTimeout(() => document.getElementById('chatInput').value = '我想塔罗占卜，请先洗牌然后给我3张牌', 100); }
+function openDream() { openChat(); setTimeout(() => document.getElementById('chatInput').value = '我梦到了蛇追我，请用周公解梦的方式帮我解读', 100); }
+function openCouplet() { openChat(); setTimeout(() => document.getElementById('chatInput').value = '帮我写一副春节对联，上联以"春"开头，下联以"福"开头', 100); }
+function openInterview() { openChat(); setTimeout(() => document.getElementById('chatInput').value = '我即将面试产品经理，请给我5个常见面试问题和参考答案', 100); }
+function openStudy() { openChat(); setTimeout(() => document.getElementById('chatInput').value = '请给我讲解一下勾股定理，并出3道练习题', 100); }
+
+// ============ 模态框 ============
+function showLogin() { document.getElementById('loginModal').classList.add('show'); }
+function showRegister() { document.getElementById('registerModal').classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function switchModal(from, to) { closeModal(from); document.getElementById(to).classList.add('show'); }
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) closeModal(el.id); });
+});
+
+// ============ 登录/注册/用户 ============
+function checkAuth() {
+  if (token && username) {
+    currentUser = { username, token, apiKey };
+    document.getElementById('guestArea').style.display = 'none';
+    document.getElementById('userArea').style.display = '';
+    document.getElementById('userNameDisplay').textContent = '👤 ' + username;
+  }
+}
+async function doLogin() {
+  const btn = document.getElementById('loginBtn');
+  const u = document.getElementById('loginUsername').value.trim();
+  const p = document.getElementById('loginPassword').value;
+  const err = document.getElementById('loginError');
+  if (!u || !p) { err.textContent = '请填写用户名和密码'; return; }
+  btn.disabled = true; btn.textContent = '登录中…'; err.textContent = '';
+  try {
+    const res = await fetch(API_BASE + '/v1/auth/login', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ username: u, password: p })
+    });
+    const data = await res.json();
+    if (data.token) {
+      token = data.token;
+      username = u;
+      localStorage.setItem('lingji_token', token);
+      localStorage.setItem('lingji_username', username);
+      if (data.api_key) { apiKey = data.api_key; localStorage.setItem('lingji_api_key', apiKey); }
+      closeModal('loginModal');
+      checkAuth();
+      showToast('登录成功！', 'success');
+    } else {
+      err.textContent = data.error?.message || '登录失败';
+    }
+  } catch(e) { err.textContent = '网络错误，请稍后重试'; }
+  btn.disabled = false; btn.textContent = '登录';
+}
+async function sendCode() {
+  const email = document.getElementById('regEmail').value.trim();
+  const btn = document.getElementById('sendCodeBtn');
+  if (!email) { document.getElementById('regError').textContent = '请先填写邮箱'; return; }
+  btn.textContent = '发送中…'; btn.style.pointerEvents = 'none';
+  try {
+    const res = await fetch(API_BASE + '/v1/auth/register-code', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      document.getElementById('regSuccess').textContent = '验证码已发送，请查收邮件';
+      let sec = 60;
+      btn.textContent = sec + '秒后重试';
+      codeTimer = setInterval(() => {
+        sec--; btn.textContent = sec + '秒后重试';
+        if (sec <= 0) { clearInterval(codeTimer); btn.textContent = '获取验证码'; btn.style.pointerEvents = ''; }
+      }, 1000);
+    } else {
+      document.getElementById('regError').textContent = data.error?.message || '发送失败';
+      btn.textContent = '获取验证码'; btn.style.pointerEvents = '';
+    }
+  } catch(e) { document.getElementById('regError').textContent = '网络错误'; btn.textContent = '获取验证码'; btn.style.pointerEvents = ''; }
+}
+async function doRegister() {
+  const btn = document.getElementById('regBtn');
+  const u = document.getElementById('regUsername').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const p = document.getElementById('regPassword').value;
+  const code = document.getElementById('regCode').value.trim();
+  const err = document.getElementById('regError');
+  if (!u || !email || !p || !code) { err.textContent = '请填写完整'; return; }
+  btn.disabled = true; btn.textContent = '注册中…'; err.textContent = '';
+  try {
+    const res = await fetch(API_BASE + '/v1/auth/register', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ username: u, email, password: p, code })
+    });
+    const data = await res.json();
+    if (data.token) {
+      token = data.token; username = u;
+      localStorage.setItem('lingji_token', token);
+      localStorage.setItem('lingji_username', username);
+      if (data.api_key) { apiKey = data.api_key; localStorage.setItem('lingji_api_key', apiKey); }
+      closeModal('registerModal');
+      checkAuth();
+      showToast('注册成功！', 'success');
+    } else {
+      err.textContent = data.error?.message || '注册失败';
+    }
+  } catch(e) { err.textContent = '网络错误'; }
+  btn.disabled = false; btn.textContent = '注册';
+}
+async function sendResetCode() {
+  const email = document.getElementById('resetEmail').value.trim();
+  const btn = document.getElementById('sendResetCodeBtn');
+  if (!email) { document.getElementById('resetError').textContent = '请先填写邮箱'; return; }
+  btn.textContent = '发送中…'; btn.style.pointerEvents = 'none';
+  try {
+    const res = await fetch(API_BASE + '/v1/auth/reset-password-code', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      document.getElementById('resetSuccess').textContent = '验证码已发送';
+      let sec = 60;
+      btn.textContent = sec + '秒后重试';
+      const t = setInterval(() => {
+        sec--; btn.textContent = sec + '秒后重试';
+        if (sec <= 0) { clearInterval(t); btn.textContent = '获取验证码'; btn.style.pointerEvents = ''; }
+      }, 1000);
+    } else { document.getElementById('resetError').textContent = data.error?.message || '发送失败'; btn.textContent = '获取验证码'; btn.style.pointerEvents = ''; }
+  } catch(e) { document.getElementById('resetError').textContent = '网络错误'; btn.textContent = '获取验证码'; btn.style.pointerEvents = ''; }
+}
+async function doReset() {
+  const email = document.getElementById('resetEmail').value.trim();
+  const code = document.getElementById('resetCode').value.trim();
+  const pwd = document.getElementById('resetPassword').value;
+  const err = document.getElementById('resetError');
+  if (!email || !code || !pwd) { err.textContent = '请填写完整'; return; }
+  try {
+    const res = await fetch(API_BASE + '/v1/auth/reset-password', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ email, code, password: pwd })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      document.getElementById('resetSuccess').textContent = '密码重置成功，请登录';
+      setTimeout(() => switchModal('resetModal', 'loginModal'), 1500);
+    } else { err.textContent = data.error?.message || '重置失败'; }
+  } catch(e) { err.textContent = '网络错误'; }
+}
+function logout() {
+  token = null; username = null; apiKey = null;
+  localStorage.removeItem('lingji_token');
+  localStorage.removeItem('lingji_username');
+  localStorage.removeItem('lingji_api_key');
+  currentUser = null;
+  document.getElementById('guestArea').style.display = '';
+  document.getElementById('userArea').style.display = 'none';
+  showToast('已退出登录', 'success');
+}
+
+// ============ AI聊天 ============
+function addBotMessage(text) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  div.innerHTML = '<div class="msg-avatar">🤖</div><div class="msg-bubble">' + escapeHtml(text) + '</div>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+function addUserMessage(text) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.innerHTML = '<div class="msg-avatar">👤</div><div class="msg-bubble">' + escapeHtml(text) + '</div>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+function addLoading() {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg bot loading';
+  div.id = 'loadingMsg';
+  div.innerHTML = '<div class="msg-avatar">🤖</div><div class="msg-bubble">思考中…</div>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+function removeLoading() {
+  const el = document.getElementById('loadingMsg');
+  if (el) el.remove();
+}
+function saveModel() {
+  currentModel = document.getElementById('modelSelect').value;
+  localStorage.setItem('lingji_model', currentModel);
+}
+async function loadBalance() {
+  if (!token) { document.getElementById('balanceDisplay').textContent = '未登录（游客模式）'; return; }
+  try {
+    const res = await fetch(API_BASE + '/v1/user/info', { headers: { 'Authorization': 'Bearer ' + token } });
+    if (res.ok) {
+      const data = await res.json();
+      const balance = data.balance ?? 0;
+      document.getElementById('balanceDisplay').textContent = '余额：' + balance + ' 元';
+    } else { document.getElementById('balanceDisplay').textContent = '余额查询失败'; }
+  } catch(e) { document.getElementById('balanceDisplay').textContent = '余额：--'; }
+}
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  addUserMessage(text);
+  input.value = '';
+  const sendBtn = document.getElementById('sendBtn');
+  sendBtn.disabled = true;
+  addLoading();
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    const res = await fetch(API_BASE + '/v1/chat', {
+      method: 'POST', headers,
+      body: JSON.stringify({ model: currentModel, messages: [{ role: 'user', content: text }] })
+    });
+    const data = await res.json();
+    removeLoading();
+    if (data.choices && data.choices[0]) {
+      addBotMessage(data.choices[0].message.content);
+    } else if (data.error) {
+      addBotMessage('错误：' + (data.error.message || JSON.stringify(data.error)));
+    } else {
+      addBotMessage('抱歉，服务暂时不可用，请稍后重试。');
+    }
+  } catch(e) { removeLoading(); addBotMessage('网络错误，请检查网络连接'); }
+  sendBtn.disabled = false;
+}
+function chatKeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+// ============ 角色扮演 ============
+const roles = {
+  luxun: { name: '鲁迅', avatar: '🪶', tagline: '文学巨匠，犀利深刻。回答问题时请注意鲁迅的语言风格：简洁有力、讽刺深刻、常有警句。' },
+  libai: { name: '李白', avatar: '🍶', tagline: '诗仙浪漫，豪放不羁。回答时请展现李白洒脱飘逸的诗仙气质，可用诗句辅助表达。' },
+  jobs: { name: '乔布斯', avatar: '🍎', tagline: '创新教父，改变世界。回答时请保持乔布斯偏执简约的产品哲学和演讲风格。' },
+  einstein: { name: '爱因斯坦', avatar: '⚛️', tagline: '科学巨擘，洞察宇宙。回答时请展现爱因斯坦的智慧、幽默和对科学的热情。' },
+  lincoln: { name: '林肯', avatar: '🎩', tagline: '伟大总统，人民公仆。回答时请保持林肯谦逊、睿智、充满哲理的语言风格。' },
+  linzirong: { name: '林子容', avatar: '🧥', tagline: '知心姐姐，温暖治愈。她善于倾听，理解你的困惑，给你温暖的建议。' },
+  psychologist: { name: '心理医生', avatar: '🛋️', tagline: '专业倾听，疗愈心灵。具备专业心理学知识，帮助你梳理情绪和困扰。' },
+  business: { name: '商业顾问', avatar: '💼', tagline: '战略高手，洞察商机。深谙商业规律，能帮你分析市场和战略问题。' }
+};
+let currentRole = 'luxun';
+let rpHistory = [];
+
+function selectRole(el, roleId) {
+  document.querySelectorAll('.role-item').forEach(r => r.classList.remove('active'));
+  el.classList.add('active');
+  currentRole = roleId;
+  const role = roles[roleId];
+  document.getElementById('rpAvatar').textContent = role.avatar;
+  document.getElementById('rpName').textContent = role.name;
+  document.getElementById('rpTagline').textContent = role.tagline;
+  document.getElementById('rpMessages').innerHTML = '';
+  rpHistory = [{ role: 'system', content: '你扮演' + role.name + '。' + role.tagline + '请用第一人称回答。' }];
+  addRpMessage('bot', '你好，我是' + role.name + '。有什么想和我聊的？', role.avatar);
+}
+function addRpMessage(type, text, avatar) {
+  const container = document.getElementById('rpMessages');
+  const div = document.createElement('div');
+  div.className = 'rp-msg ' + type;
+  div.innerHTML = '<div class="rp-avatar">' + (type === 'bot' ? avatar : '👤') + '</div><div class="rp-bubble">' + escapeHtml(text) + '</div>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+async function sendRpMessage() {
+  const input = document.getElementById('rpInput');
+  const text = input.value.trim();
+  if (!text) return;
+  addRpMessage('user', text, '👤');
+  input.value = '';
+  const role = roles[currentRole];
+  rpHistory.push({ role: 'user', content: text });
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    const res = await fetch(API_BASE + '/v1/chat', {
+      method: 'POST', headers,
+      body: JSON.stringify({ model: currentModel, messages: rpHistory })
+    });
+    const data = await res.json();
+    if (data.choices && data.choices[0]) {
+      const reply = data.choices[0].message.content;
+      rpHistory.push({ role: 'assistant', content: reply });
+      addRpMessage('bot', reply, role.avatar);
+    } else { addRpMessage('bot', '抱歉，出了点问题…', role.avatar); }
+  } catch(e) { addRpMessage('bot', '网络错误', role.avatar); }
+}
+function rpKeyDown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendRpMessage(); } }
+
+// ============ 写作工坊 ============
+const writingConfigs = {
+  article: { title: '📝 AI文章写作', desc: '输入主题和要求，AI帮你写完整文章', topic: '写作主题', topicP: '例如：人工智能对未来教育的影响', extra: '补充要求（选填）', extraP: '例如：需要有数据支撑，语言生动' },
+  copy: { title: '📣 AI营销文案', desc: '输入产品/活动信息，AI生成吸睛文案', topic: '产品/活动信息', topicP: '例如：新品咖啡上市，主打香浓醇厚', extra: '目标用户（选填）', extraP: '例如：都市白领，喜欢精品咖啡' },
+  email: { title: '📧 AI邮件撰写', desc: '描述邮件场景和内容，AI帮你写专业邮件', topic: '邮件主题/场景', topicP: '例如：向上司汇报项目进展', extra: '补充信息（选填）', extraP: '例如：项目进展顺利，需要申请延期一周' },
+  summary: { title: '📋 AI内容总结', desc: '粘贴长文或链接，AI帮你提炼要点', topic: '内容或链接', topicP: '粘贴文章内容或网址', extra: '总结重点（选填）', extraP: '列出3-5个核心观点即可' },
+  translate: { title: '🌐 AI中英翻译', desc: '输入中文或英文，AI精准翻译', topic: '翻译内容', topicP: '输入要翻译的文字', extra: '翻译风格（选填）', extraP: '例如：学术论文风格 / 口语化 / 正式商务' }
+};
+function selectWritingTool(el, tool) {
+  document.querySelectorAll('.writing-tool-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  const cfg = writingConfigs[tool];
+  document.getElementById('writingTitle').textContent = cfg.title;
+  document.getElementById('writingDesc').textContent = cfg.desc;
+  document.getElementById('writingResult').style.display = 'none';
+  document.getElementById('writingForm').style.display = '';
+  document.getElementById('writingForm').querySelectorAll('input')[0].placeholder = cfg.topicP;
+  document.getElementById('writingForm').querySelectorAll('label')[2].textContent = cfg.extra;
+  document.getElementById('writingForm').querySelectorAll('input')[1].placeholder = cfg.extraP;
+}
+async function generateWriting() {
+  const topic = document.getElementById('wTopic').value.trim();
+  const type = document.getElementById('wType').value;
+  const len = document.getElementById('wLength').value;
+  const extra = document.getElementById('wExtra').value.trim();
+  if (!topic) { showToast('请输入写作主题', 'error'); return; }
+  const tool = document.querySelector('.writing-tool-item.active').dataset.tool || 'article';
+  let prompt = '';
+  if (tool === 'article') prompt = '请帮我写一篇' + type + '，主题：' + topic + '，字数要求：' + len + (extra ? '，补充要求：' + extra : '') + '。请直接输出文章内容，不需要其他说明。';
+  else if (tool === 'copy') prompt = '请帮我写一段营销文案。产品/活动：' + topic + (extra ? '，目标用户：' + extra : '') + '。请直接输出文案，要求吸引人、有传播性。';
+  else if (tool === 'email') prompt = '请帮我写一封邮件。场景：' + topic + (extra ? '，补充：' + extra : '') + '。请输出完整邮件正文，包含称谓和落款。';
+  else if (tool === 'summary') prompt = '请帮我总结以下内容的核心要点：\n' + topic + (extra ? '\n\n总结要求：' + extra : '\n\n请列出3-5个核心观点，用简洁的语言概括。');
+  else if (tool === 'translate') prompt = '请翻译以下内容' + (extra ? '，风格：' + extra : '') + '：\n' + topic;
+  document.getElementById('writingForm').style.display = 'none';
+  document.getElementById('writingResult').style.display = '';
+  document.getElementById('writingResult').textContent = '✍️ AI正在创作中，请稍候…';
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    const res = await fetch(API_BASE + '/v1/chat', {
+      method: 'POST', headers,
+      body: JSON.stringify({ model: currentModel, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await res.json();
+    if (data.choices && data.choices[0]) {
+      document.getElementById('writingResult').textContent = data.choices[0].message.content;
+    } else { document.getElementById('writingResult').textContent = '生成失败：' + (data.error?.message || '未知错误'); }
+  } catch(e) { document.getElementById('writingResult').textContent = '网络错误，请稍后重试'; }
+}
+
+// ============ 起名 ============
+function selectNamingType(el, type) {
+  document.querySelectorAll('.naming-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('namingBaby').style.display = type === 'baby' ? '' : 'none';
+  document.getElementById('namingCompany').style.display = type === 'company' ? '' : 'none';
+  document.getElementById('namingBrand').style.display = type === 'brand' ? '' : 'none';
+  document.getElementById('namingResult').classList.remove('show');
+}
+async function generateNames() {
+  const surname = document.getElementById('nSurname').value.trim();
+  const gender = document.getElementById('nGender').value;
+  const birth = document.getElementById('nBirth').value.trim();
+  const hope = document.getElementById('nHope').value.trim();
+  if (!surname) { showToast('请输入姓氏', 'error'); return; }
+  const prompt = '请为姓氏"' + surname + '"的宝宝起名。' + (gender === 'boy' ? '性别：男孩' : gender === 'girl' ? '性别：女孩' : '性别不限') + (birth ? '，出生时间：' + birth : '') + (hope ? '，父母期望：' + hope : '') + '。请给出5个好名字，每个名字附上简短解释和拼音。注意名字要新颖独特，不要太常见。';
+  const btn = document.getElementById('nBtn');
+  btn.disabled = true; btn.textContent = '起名中…';
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    const res = await fetch(API_BASE + '/v1/chat', {
+      method: 'POST', headers,
+      body: JSON.stringify({ model: currentModel, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await res.json();
+    if (data.choices && data.choices[0]) {
+      const reply = data.choices[0].message.content;
+      const names = reply.match(/[一-龥]{2,3}/g) || [];
+      const mainName = names.length > 0 ? surname + names[0] : surname + '——';
+      document.getElementById('nResultName').textContent = mainName;
+      document.getElementById('nResultExplain').textContent = reply;
+      document.getElementById('namingResult').classList.add('show');
+    }
+  } catch(e) {}
+  btn.disabled = false; btn.textContent = '✨ 开始起名';
+}
+async function generateCompanyNames() {
+  const industry = document.getElementById('cIndustry').value.trim();
+  const idea = document.getElementById('cIdea').value.trim();
+  const extra = document.getElementById('cExtra').value.trim();
+  if (!industry) { showToast('请输入行业类型', 'error'); return; }
+  const btn = document.getElementById('cnBtn');
+  btn.disabled = true; btn.textContent = '起名中…';
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    const res = await fetch(API_BASE + '/v1/chat', {
+      method: 'POST', headers,
+      body: JSON.stringify({ model: currentModel, messages: [{ role: 'user', content: '请为一家从事"' + industry + '"的公司起名。核心理念：' + (idea || '创新发展') + (extra ? '，其他要求：' + extra : '') + '。请给出5个公司名，每个附上简短说明。' }] })
+    });
+    const data = await res.json();
+    if (data.choices && data.choices[0]) {
+      const reply = data.choices[0].message.content;
+      const names = reply.match(/(?:名为|名(?:称)?[:：])\s*["""]?([^""\n]+)["""]?/g) || [];
+      document.getElementById('nResultName').textContent = names.length > 0 ? names[0].replace(/.*名为|["""]/g, '') : '——';
+      document.getElementById('nResultExplain').textContent = reply;
+      document.getElementById('namingResult').classList.add('show');
+    }
+  } catch(e) {}
+  btn.disabled = false; btn.textContent = '✨ 开始起名';
+}
+async function generateBrandNames() {
+  const btype = document.getElementById('bType').value.trim();
+  const pos = document.getElementById('bPos').value.trim();
+  const target = document.getElementById('bTarget').value.trim();
+  if (!btype) { showToast('请输入品牌类型', 'error'); return; }
+  const btn = document.getElementById('bnBtn');
+  btn.disabled = true; btn.textContent = '起名中…';
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    const res = await fetch(API_BASE + '/v1/chat', {
+      method: 'POST', headers,
+      body: JSON.stringify({ model: currentModel, messages: [{ role: 'user', content: '请为"' + btype + '"品牌起名。品牌定位：' + (pos || '中高端') + '，目标用户：' + (target || '大众') + '。请给出5个品牌名，每个附上说明和适用场景。' }] })
+    });
+    const data = await res.json();
+    if (data.choices && data.choices[0]) {
+      document.getElementById('nResultName').textContent = '——';
+      document.getElementById('nResultExplain').textContent = data.choices[0].message.content;
+      document.getElementById('namingResult').classList.add('show');
+    }
+  } catch(e) {}
+  btn.disabled = false; btn.textContent = '✨ 开始起名';
+}
+
+// ============ Toast ============
+function showToast(msg, type) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast show ' + (type || '');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ============ 初始化 ============
+checkAuth();
+</script>
+</body>
+</html>
