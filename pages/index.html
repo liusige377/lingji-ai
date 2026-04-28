@@ -435,19 +435,19 @@
   <div class="writing-container">
     <div class="writing-tools">
       <h3>✍️ 写作类型</h3>
-      <div class="writing-tool-item active" onclick="selectWritingTool(this, 'article')">
+      <div class="writing-tool-item active" data-tool="article" onclick="selectWritingTool(this, 'article')">
         <div class="w-icon">📝</div><div class="w-name">文章写作</div>
       </div>
-      <div class="writing-tool-item" onclick="selectWritingTool(this, 'copy')">
+      <div class="writing-tool-item" data-tool="copy" onclick="selectWritingTool(this, 'copy')">
         <div class="w-icon">📣</div><div class="w-name">营销文案</div>
       </div>
-      <div class="writing-tool-item" onclick="selectWritingTool(this, 'email')">
+      <div class="writing-tool-item" data-tool="email" onclick="selectWritingTool(this, 'email')">
         <div class="w-icon">📧</div><div class="w-name">邮件撰写</div>
       </div>
-      <div class="writing-tool-item" onclick="selectWritingTool(this, 'summary')">
+      <div class="writing-tool-item" data-tool="summary" onclick="selectWritingTool(this, 'summary')">
         <div class="w-icon">📋</div><div class="w-name">内容总结</div>
       </div>
-      <div class="writing-tool-item" onclick="selectWritingTool(this, 'translate')">
+      <div class="writing-tool-item" data-tool="translate" onclick="selectWritingTool(this, 'translate')">
         <div class="w-icon">🌐</div><div class="w-name">中英翻译</div>
       </div>
     </div>
@@ -510,7 +510,8 @@
 <div class="toast" id="toast"></div>
 
 <footer class="footer">
-  <p>灵芝机 · AI百宝箱 &nbsp;|&nbsp; 基于31+大模型构建</p>
+  <p>灵芝机 · AI百宝箱 &nbsp;|&nbsp; 基于31+大模型构建 &nbsp;|&nbsp; <a href="https://github.com/liusige377/lingji-ai" target="_blank" style="color:#555">GitHub</a></p>
+  <p style="margin-top:8px;font-size:11px;color:#333">Powered by 灵芝机AI &copy; 2026</p>
 </footer>
 
 <script>
