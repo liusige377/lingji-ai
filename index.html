@@ -276,9 +276,9 @@
       <button class="btn btn-outline" onclick="showTools()" style="padding:12px 32px;font-size:16px">📦 查看全部工具</button>
     </div>
     <div class="hero-stats">
-      <div class="stat"><div class="stat-num">31+</div><div class="stat-label">AI模型</div></div>
-      <div class="stat"><div class="stat-num">10+</div><div class="stat-label">AI工具</div></div>
-      <div class="stat"><div class="stat-num">免费</div><div class="stat-label">注册即用</div></div>
+      <div class="stat"><div class="stat-num">智能</div><div class="stat-label">多模型协作</div></div>
+      <div class="stat"><div class="stat-num">专业</div><div class="stat-label">场景化工具</div></div>
+      <div class="stat"><div class="stat-num">开放</div><div class="stat-label">免费无限制</div></div>
     </div>
   </div>
 
@@ -627,7 +627,7 @@ async function sendCode() {
   if (!email) { document.getElementById('regError').textContent = '请先填写邮箱'; return; }
   btn.textContent = '发送中…'; btn.style.pointerEvents = 'none';
   try {
-    const res = await fetch(API_BASE + '/v1/auth/register-code', {
+    const res = await fetch(API_BASE + '/v1/auth/send-verify-code', {
       method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ email })
     });
@@ -681,7 +681,7 @@ async function sendResetCode() {
   if (!email) { document.getElementById('resetError').textContent = '请先填写邮箱'; return; }
   btn.textContent = '发送中…'; btn.style.pointerEvents = 'none';
   try {
-    const res = await fetch(API_BASE + '/v1/auth/reset-password-code', {
+    const res = await fetch(API_BASE + '/v1/auth/send-verify-code', {
       method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ email })
     });
@@ -783,7 +783,7 @@ async function sendMessage() {
   try {
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = 'Bearer ' + token;
-    const res = await fetch(API_BASE + '/v1/chat', {
+    const res = await fetch(API_BASE + '/v1/chat/completions', {
       method: 'POST', headers,
       body: JSON.stringify({ model: currentModel, messages: [{ role: 'user', content: text }] })
     });
@@ -851,7 +851,7 @@ async function sendRpMessage() {
   try {
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = 'Bearer ' + token;
-    const res = await fetch(API_BASE + '/v1/chat', {
+    const res = await fetch(API_BASE + '/v1/chat/completions', {
       method: 'POST', headers,
       body: JSON.stringify({ model: currentModel, messages: rpHistory })
     });
@@ -884,6 +884,11 @@ function selectWritingTool(el, tool) {
   document.getElementById('writingForm').querySelectorAll('input')[0].placeholder = cfg.topicP;
   document.getElementById('writingForm').querySelectorAll('label')[2].textContent = cfg.extra;
   document.getElementById('writingForm').querySelectorAll('input')[1].placeholder = cfg.extraP;
+  // 根据工具类型显示/隐藏字段
+  const typeField = document.getElementById('wType')?.parentElement;
+  const lenField = document.getElementById('wLength')?.parentElement;
+  if (typeField) typeField.style.display = tool === 'article' ? '' : 'none';
+  if (lenField) lenField.style.display = tool === 'article' ? '' : 'none';
 }
 async function generateWriting() {
   const topic = document.getElementById('wTopic').value.trim();
@@ -904,7 +909,7 @@ async function generateWriting() {
   try {
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = 'Bearer ' + token;
-    const res = await fetch(API_BASE + '/v1/chat', {
+    const res = await fetch(API_BASE + '/v1/chat/completions', {
       method: 'POST', headers,
       body: JSON.stringify({ model: currentModel, messages: [{ role: 'user', content: prompt }] })
     });
@@ -936,7 +941,7 @@ async function generateNames() {
   try {
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = 'Bearer ' + token;
-    const res = await fetch(API_BASE + '/v1/chat', {
+    const res = await fetch(API_BASE + '/v1/chat/completions', {
       method: 'POST', headers,
       body: JSON.stringify({ model: currentModel, messages: [{ role: 'user', content: prompt }] })
     });
@@ -946,7 +951,7 @@ async function generateNames() {
       const names = reply.match(/[一-龥]{2,3}/g) || [];
       const mainName = names.length > 0 ? surname + names[0] : surname + '——';
       document.getElementById('nResultName').textContent = mainName;
-      document.getElementById('nResultExplain').textContent = reply;
+      document.getElementById('nResultExplain').innerHTML = reply.replace(/\n/g, '<br>');
       document.getElementById('namingResult').classList.add('show');
     }
   } catch(e) {}
@@ -962,7 +967,7 @@ async function generateCompanyNames() {
   try {
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = 'Bearer ' + token;
-    const res = await fetch(API_BASE + '/v1/chat', {
+    const res = await fetch(API_BASE + '/v1/chat/completions', {
       method: 'POST', headers,
       body: JSON.stringify({ model: currentModel, messages: [{ role: 'user', content: '请为一家从事"' + industry + '"的公司起名。核心理念：' + (idea || '创新发展') + (extra ? '，其他要求：' + extra : '') + '。请给出5个公司名，每个附上简短说明。' }] })
     });
@@ -971,7 +976,7 @@ async function generateCompanyNames() {
       const reply = data.choices[0].message.content;
       const names = reply.match(/(?:名为|名(?:称)?[:：])\s*["""]?([^""\n]+)["""]?/g) || [];
       document.getElementById('nResultName').textContent = names.length > 0 ? names[0].replace(/.*名为|["""]/g, '') : '——';
-      document.getElementById('nResultExplain').textContent = reply;
+      document.getElementById('nResultExplain').innerHTML = reply.replace(/\n/g, '<br>');
       document.getElementById('namingResult').classList.add('show');
     }
   } catch(e) {}
@@ -987,7 +992,7 @@ async function generateBrandNames() {
   try {
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = 'Bearer ' + token;
-    const res = await fetch(API_BASE + '/v1/chat', {
+    const res = await fetch(API_BASE + '/v1/chat/completions', {
       method: 'POST', headers,
       body: JSON.stringify({ model: currentModel, messages: [{ role: 'user', content: '请为"' + btype + '"品牌起名。品牌定位：' + (pos || '中高端') + '，目标用户：' + (target || '大众') + '。请给出5个品牌名，每个附上说明和适用场景。' }] })
     });
