@@ -2046,8 +2046,8 @@ let token = localStorage.getItem('lingji_token');
 
 
 
-// 默认使用智谱AI免费API（GLM-4-Flash永久免费），用户可自定义覆盖
-let apiKey = localStorage.getItem('lingji_api_key') || '61df839b1e39e3b1b9baeeb5cd53f8c2.V3Ir5M1gTbNnEhQO';
+// 默认走ECS服务器（免费无需API Key），用户可自定义覆盖
+let apiKey = localStorage.getItem('lingji_api_key') || '';
 const CHAT_BASE = apiKey ? 'https://open.bigmodel.cn/api/paas/v4' : API_BASE;
 function chatHeaders() { const h = { 'Content-Type': 'application/json' }; if(apiKey) h['Authorization'] = 'Bearer ' + apiKey; else if(token) h['Authorization'] = 'Bearer ' + token; return h; }
 
